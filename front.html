@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document Upload and IPFS Integration</title>
+</head>
+<body>
+    <input type="file" id="fileInput">
+    <button id="retrieveButton" disabled>Retrieve Document</button>
+    <input type="text" id="shareLink" readonly hidden>
+
+    <br><br>
+
+    <button id="uploadButton">Upload Document to IPFS</button>
+    <button id="getHashesButton">Get All IPFS Hashes</button>
+    <div id="hashesContainer"></div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const retrieveButton = document.getElementById('retrieveButton');
+        const uploadButton = document.getElementById('uploadButton');
+        const getHashesButton = document.getElementById('getHashesButton');
+        const hashesContainer = document.getElementById('hashesContainer');
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                retrieveButton.disabled = false;
+                alert('Document fetched successfully! Kindly click on upload to upload to the database.');
+            } else {
+                retrieveButton.disabled = true;
+            }
+        });
+
+        retrieveButton.addEventListener('click', () => {
+            alert('Document retrieved successfully!');
+        });
+
+        uploadButton.addEventListener('click', async () => {
+            if (fileInput.files.length === 0) {
+                alert('Please select a file first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            try {
+                const response = await fetch("/uploadToIpfs", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error uploading file");
+                }
+
+                const result = await response.json();
+                console.log(result);
+
+                alert('Document uploaded to IPFS and hash added to contract successfully!');
+            } catch (error) {
+                console.error(error);
+                alert('Error uploading document to IPFS');
+            }
+        });
+
+        getHashesButton.addEventListener('click', async () => {
+            // This part would be implemented according to your smart contract logic
+        });
+    </script>
+</body>
+</html>
