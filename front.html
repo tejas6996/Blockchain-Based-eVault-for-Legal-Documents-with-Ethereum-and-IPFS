@@ -50,7 +50,7 @@
             background-color: #555;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
         }
-        #retrieveButton:disabled {
+        #uploadButton:disabled {
             background-color: #ccc;
             cursor: not-allowed;
         }
@@ -60,7 +60,7 @@
             flex-wrap: wrap;
         }
         .button-group button {
-            width: calc(33.33% - 10px);
+            width: calc(50% - 10px);
             margin: 10px 5px;
         }
         #hashesContainer {
@@ -79,37 +79,28 @@
         <h1>Document Upload and IPFS Integration</h1>
         <div class="file-input-container">
             <input type="file" id="fileInput">
-            <button id="retrieveButton" disabled>Retrieve Document</button>
         </div>
         <div class="button-group">
             <button id="uploadButton">Upload Document to IPFS</button>
-            <button id="getHashesButton">Get All IPFS Hashes</button>
-            <button id="uploadHashButton">Upload Hash</button>
+            <button id="getHashesButton">Get IPFS Hash</button>
         </div>
-        <input type="text" id="shareLink" readonly hidden>
         <div id="hashesContainer"></div>
     </div>
 
     <script>
         const fileInput = document.getElementById('fileInput');
-        const retrieveButton = document.getElementById('retrieveButton');
         const uploadButton = document.getElementById('uploadButton');
         const getHashesButton = document.getElementById('getHashesButton');
-        const uploadHashButton = document.getElementById('uploadHashButton');
         const hashesContainer = document.getElementById('hashesContainer');
         let uploadedHash = '';
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                retrieveButton.disabled = false;
+                uploadButton.disabled = false;
                 alert('Document fetched successfully! Kindly click on upload to upload to the database.');
             } else {
-                retrieveButton.disabled = true;
+                uploadButton.disabled = true;
             }
-        });
-
-        retrieveButton.addEventListener('click', () => {
-            alert('Document retrieved successfully!');
         });
 
         uploadButton.addEventListener('click', async () => {
@@ -136,6 +127,7 @@
 
                 uploadedHash = result[0].hash;
                 alert('Document uploaded to IPFS and hash added to contract successfully!');
+                displayHash(uploadedHash);
             } catch (error) {
                 console.error(error);
                 alert('Error uploading document to IPFS');
@@ -154,34 +146,13 @@
             }
         });
 
-        uploadHashButton.addEventListener('click', async () => {
-            const hash = prompt("Enter the IPFS hash to upload:");
-            if (!hash) {
-                alert("IPFS hash is required.");
-                return;
-            }
-
-            try {
-                const response = await fetch("/uploadHash", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({ hash })
-                });
-
-                if (!response.ok) {
-                    throw new Error("Error uploading hash");
-                }
-
-                alert('IPFS hash uploaded successfully!');
-            } catch (error) {
-                console.error(error);
-                alert('Error uploading IPFS hash');
-            }
-        });
+        function displayHash(hash) {
+            hashesContainer.innerHTML = '';
+            const hashElement = document.createElement('div');
+            hashElement.textContent = hash;
+            hashesContainer.appendChild(hashElement);
+        }
     </script>
 </body>
 </html>
-
 
