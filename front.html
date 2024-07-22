@@ -60,7 +60,7 @@
             flex-wrap: wrap;
         }
         .button-group button {
-            width: calc(50% - 10px);
+            width: calc(33.33% - 10px);
             margin: 10px 5px;
         }
         #hashesContainer {
@@ -84,6 +84,7 @@
         <div class="button-group">
             <button id="uploadButton">Upload Document to IPFS</button>
             <button id="getHashesButton">Get All IPFS Hashes</button>
+            <button id="uploadHashButton">Upload Hash</button>
         </div>
         <input type="text" id="shareLink" readonly hidden>
         <div id="hashesContainer"></div>
@@ -94,7 +95,9 @@
         const retrieveButton = document.getElementById('retrieveButton');
         const uploadButton = document.getElementById('uploadButton');
         const getHashesButton = document.getElementById('getHashesButton');
+        const uploadHashButton = document.getElementById('uploadHashButton');
         const hashesContainer = document.getElementById('hashesContainer');
+        let uploadedHash = '';
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
@@ -131,6 +134,7 @@
                 const result = await response.json();
                 console.log(result);
 
+                uploadedHash = result[0].hash;
                 alert('Document uploaded to IPFS and hash added to contract successfully!');
             } catch (error) {
                 console.error(error);
@@ -139,27 +143,41 @@
         });
 
         getHashesButton.addEventListener('click', async () => {
+            hashesContainer.innerHTML = '';
+
+            if (uploadedHash) {
+                const hashElement = document.createElement('div');
+                hashElement.textContent = uploadedHash;
+                hashesContainer.appendChild(hashElement);
+            } else {
+                hashesContainer.textContent = 'No IPFS hashes found.';
+            }
+        });
+
+        uploadHashButton.addEventListener('click', async () => {
+            const hash = prompt("Enter the IPFS hash to upload:");
+            if (!hash) {
+                alert("IPFS hash is required.");
+                return;
+            }
+
             try {
-                const response = await fetch("/getIpfsHashes");
+                const response = await fetch("/uploadHash", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ hash })
+                });
+
                 if (!response.ok) {
-                    throw new Error("Error fetching IPFS hashes");
+                    throw new Error("Error uploading hash");
                 }
 
-                const hashes = await response.json();
-                hashesContainer.innerHTML = '';
-
-                if (hashes.length === 0) {
-                    hashesContainer.textContent = 'No IPFS hashes found.';
-                } else {
-                    hashes.forEach(hash => {
-                        const hashElement = document.createElement('div');
-                        hashElement.textContent = hash;
-                        hashesContainer.appendChild(hashElement);
-                    });
-                }
+                alert('IPFS hash uploaded successfully!');
             } catch (error) {
                 console.error(error);
-                alert('Error fetching IPFS hashes');
+                alert('Error uploading IPFS hash');
             }
         });
     </script>
